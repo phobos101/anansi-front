@@ -3,13 +3,16 @@ var map;
 var bounds;
 var infowindow = null;
 var city = 'London';
-var cityLoc = {lat: 51.507351, lng: -0.127758};
+var cityLoc = {
+  lat: 51.507351,
+  lng: -0.127758
+};
 var markerImages = {
   "Javascript": "../public/assets/map-marker-neon-green.png",
   "Python": "../public/assets/map-marker-neon-green.png",
   "Hackathon": "../public/assets/map-marker-neon-green.png",
-  undefined:"../public/assets/map-marker-neon-green.png"
-}
+  undefined: "../public/assets/map-marker-neon-green.png"
+};
 // iconImage();
 
 $("#city-form").on("click", function() {
@@ -23,7 +26,7 @@ function getEvents() {
     url: 'http://localhost:3000/api/events'
   }).done(function(data) {
     return seedPins(data);
-  }).fail(function(data){
+  }).fail(function(data) {
     console.log('Could not get events.');
   });
 };
@@ -31,8 +34,8 @@ function getEvents() {
 function seedPins(data) {
   var geocoder = new google.maps.Geocoder();
   $.each(data.events, function(index, event) {
-    var eventTime = Date.parse(event.date)
-    var now = Date.now()
+    var eventTime = Date.parse(event.date);
+    var now = Date.now();
 
     if (eventTime > now) {
       geocodeAddress(event, geocoder);
@@ -66,7 +69,6 @@ function ToggleMenu(menuToggleDiv, map) {
 
   // Setup the click event listener
   controlUI.addEventListener('click', function() {
-    console.log('clicked')
     event.preventDefault();
     $("#wrapper").toggleClass("toggled");
   });
@@ -115,20 +117,22 @@ function initMap() {
     geocodeAddress(eventObj, geocoder);
 
     $.ajax({
-  		method: 'post',
-  		url: 'http://localhost:3000/api/events/new',
-  		data: eventObj,
-  		beforeSend: setRequestHeader,
-  	}).done(function(data) {
-  		return console.log('New event added to database!');
-  	}).fail(function(data){
-  		displayErrors(data.responseJSON.message);
-  	});
+      method: 'post',
+      url: 'http://localhost:3000/api/events/new',
+      data: eventObj,
+      beforeSend: setRequestHeader,
+    }).done(function(data) {
+      return console.log('New event added to database!');
+    }).fail(function(data) {
+      displayErrors(data.responseJSON.message);
+    });
   });
 };
 
 function geocodeAddress(eventObj, geocoder) {
-  geocoder.geocode({'address': eventObj.location}, function(results, status) {
+  geocoder.geocode({
+    'address': eventObj.location
+  }, function(results, status) {
     if (status === google.maps.GeocoderStatus.OK) {
       var latLngObj = results[0]["geometry"]["location"];
       placeMarker(latLngObj, eventObj);
@@ -138,7 +142,7 @@ function geocodeAddress(eventObj, geocoder) {
   });
 };
 
-function placeMarker(pos, eventObj){
+function placeMarker(pos, eventObj) {
   // var iconImage = eventObj.category;
   // icon: markerImages[eventObj.category]
   var marker = new google.maps.Marker({
@@ -152,7 +156,6 @@ function placeMarker(pos, eventObj){
   markers.push(marker);
 
   google.maps.event.addListener(marker, "click", function(event) {
-    console.log("CLICKED")
     markerClick(marker, eventObj);
   });
 
@@ -160,230 +163,177 @@ function placeMarker(pos, eventObj){
     infoWindow.open(map, marker);
   });
 
-   google.maps.event.addListener(map, "click", function(event) {
-     infoWindow.close();
-   });
+  google.maps.event.addListener(map, "click", function(event) {
+    infoWindow.close();
+  });
 };
 
-function markerClick(marker, eventObj){
-  console.log(marker)
-  console.log(eventObj)
+function markerClick(marker, eventObj) {
   if (infowindow) infowindow.close();
 
-  var contentString = '<div id="content">'+
-  '<div id="siteNotice">'+
-  '</div>'+
-  '<h1 id="firstHeading" class="firstHeading">' + eventObj.title + '</h1>'+
-  '<div id="bodyContent">'+
-  '<img src="' + eventObj.image + '">'+
-  '<p>' + eventObj.description + '</p>'+
-  '<p><strong>Date:</strong> ' + eventObj.date + '</p>'+
-  '<p><strong>Start Time:</strong> ' + eventObj.time + '</p>'+
-  '<p><strong>Category:</strong> ' + eventObj.category + '</p>'+
-  "<button>Edit</button>" +
-  '</div>'+
-  '</div>';
+  var contentString = '<div id="content">' +
+    '<div id="siteNotice">' +
+    '</div>' +
+    '<h1 id="firstHeading" class="firstHeading">' + eventObj.title + '</h1>' +
+    '<div id="bodyContent">' +
+    '<img src="' + eventObj.image + '">' +
+    '<p>' + eventObj.description + '</p>' +
+    '<p><strong>Date:</strong> ' + eventObj.date + '</p>' +
+    '<p><strong>Start Time:</strong> ' + eventObj.time + '</p>' +
+    '<p><strong>Category:</strong> ' + eventObj.category + '</p>' +
+    '<button>Edit</button>' +
+    '</div>' +
+    '</div>';
 
   infowindow = new google.maps.InfoWindow({
-   content: contentString
- });
+    content: contentString
+  });
 
   map.setCenter(marker.getPosition());
   infowindow.open(map, marker);
 };
 
-function autoComplete(){
+function autoComplete() {
   var autoComplete = new google.maps.places.Autocomplete(
     document.getElementById("city-search"), {
-    types: ['(cities)']
-  });
+      types: ['(cities)']
+    });
 
   google.maps.event.addListener(autoComplete, 'place_changed', function() {
     var place = autoComplete.getPlace();
     if (place.geometry) {
-     map.panTo(place.geometry.location);
-     map.setZoom(11);
-   };
- });
+      map.panTo(place.geometry.location);
+      map.setZoom(11);
+    };
+  });
 };
 
-function styleMap(){
-  var customMapType = new google.maps.StyledMapType([
-  {
-   "featureType": "all",
-   "elementType": "labels.text.fill",
-   "stylers": [
-   {
-     "saturation": 36
-   },
-   {
-     "color": "#000000"
-   },
-   {
-     "lightness": 40
-   }
-   ]
- },
- {
-  "featureType": "all",
-  "elementType": "labels.text.stroke",
-  "stylers": [
-  {
-    "visibility": "on"
-  },
-  {
-    "color": "#000000"
-  },
-  {
-    "lightness": 16
-  }
-  ]
-},
-{
- "featureType": "all",
- "elementType": "labels.icon",
- "stylers": [
- {
-   "visibility": "off"
- }
- ]
-},
+function styleMap() {
+  var customMapType = new google.maps.StyledMapType([{
+      "featureType": "all",
+      "elementType": "labels.text.fill",
+      "stylers": [{
+        "saturation": 36
+      }, {
+        "color": "#000000"
+      }, {
+        "lightness": 40
+      }]
+    }, {
+      "featureType": "all",
+      "elementType": "labels.text.stroke",
+      "stylers": [{
+        "visibility": "on"
+      }, {
+        "color": "#000000"
+      }, {
+        "lightness": 16
+      }]
+    }, {
+      "featureType": "all",
+      "elementType": "labels.icon",
+      "stylers": [{
+        "visibility": "off"
+      }]
+    },
 
-{
- "featureType": "administrative",
- "elementType": "geometry.fill",
- "stylers": [
- {
-   "color": "#000000"
- },
- {
-   "lightness": 20
- }
- ]
-},
+    {
+      "featureType": "administrative",
+      "elementType": "geometry.fill",
+      "stylers": [{
+        "color": "#000000"
+      }, {
+        "lightness": 20
+      }]
+    },
 
-{
- "featureType": "administrative",
- "elementType": "geometry.stroke",
- "stylers": [
- {
-   "color": "#000000"
- },
- {
-   "lightness": 17
- },
- {
-   "weight": 1.2
- }
- ]
-},
+    {
+      "featureType": "administrative",
+      "elementType": "geometry.stroke",
+      "stylers": [{
+        "color": "#000000"
+      }, {
+        "lightness": 17
+      }, {
+        "weight": 1.2
+      }]
+    },
 
-{
- "featureType": "landscape",
- "elementType": "geometry",
- "stylers": [
- {
-   "color": "#000000"
- },
- {
-   "lightness": 20
- }
- ]
-},
-{
-  "featureType": "poi",
-  "elementType": "geometry",
-  "stylers": [
-  {
-    "color": "#000000"
-  },
-  {
-    "lightness": 21
-  }
-  ]
-},
+    {
+      "featureType": "landscape",
+      "elementType": "geometry",
+      "stylers": [{
+        "color": "#000000"
+      }, {
+        "lightness": 20
+      }]
+    }, {
+      "featureType": "poi",
+      "elementType": "geometry",
+      "stylers": [{
+        "color": "#000000"
+      }, {
+        "lightness": 21
+      }]
+    },
 
-{
-  "featureType": "road.highway",
-  "elementType": "geometry.fill",
-  "stylers": [
-  {
-    "color": "#000000"
-  },
-  {
-    "lightness": 17
-  }
-  ]
-},
-{
-  "featureType": "road.highway",
-  "elementType": "geometry.stroke",
-  "stylers": [
-  {
-    "color": "#000000"
-  },
-  {
-    "lightness": 29
-  },
-  {
-    "weight": 0.2
-  }
-  ]
-},
-{
- "featureType": "road.arterial",
- "elementType": "geometry",
- "stylers": [
- {
-   "color": "#000000"
- },
- {
-   "lightness": 18
- }
- ]
-},
-{
- "featureType": "road.local",
- "elementType": "geometry",
- "stylers": [
- {
-   "color": "#000000"
- },
- {
-   "lightness": 16
- }
- ]
-},
-{
- "featureType": "transit",
- "elementType": "geometry",
- "stylers": [
- {
-   "color": "#000000"
- },
- {
-   "lightness": 19
- }
- ]
-},
-{
- "featureType": "water",
- "elementType": "geometry",
- "stylers": [
- {
-   "color": "#000000"
- },
- {
-   "lightness": 17
- }
- ]
-}
+    {
+      "featureType": "road.highway",
+      "elementType": "geometry.fill",
+      "stylers": [{
+        "color": "#000000"
+      }, {
+        "lightness": 17
+      }]
+    }, {
+      "featureType": "road.highway",
+      "elementType": "geometry.stroke",
+      "stylers": [{
+        "color": "#000000"
+      }, {
+        "lightness": 29
+      }, {
+        "weight": 0.2
+      }]
+    }, {
+      "featureType": "road.arterial",
+      "elementType": "geometry",
+      "stylers": [{
+        "color": "#000000"
+      }, {
+        "lightness": 18
+      }]
+    }, {
+      "featureType": "road.local",
+      "elementType": "geometry",
+      "stylers": [{
+        "color": "#000000"
+      }, {
+        "lightness": 16
+      }]
+    }, {
+      "featureType": "transit",
+      "elementType": "geometry",
+      "stylers": [{
+        "color": "#000000"
+      }, {
+        "lightness": 19
+      }]
+    }, {
+      "featureType": "water",
+      "elementType": "geometry",
+      "stylers": [{
+        "color": "#000000"
+      }, {
+        "lightness": 17
+      }]
+    }
 
-], {
-  name: 'Custom Style'
-});
-var customMapTypeId = 'custom_style';
+  ], {
+    name: 'Custom Style'
+  });
+  var customMapTypeId = 'custom_style';
 
-map.mapTypes.set(customMapTypeId, customMapType);
-map.setMapTypeId(customMapTypeId);
+  map.mapTypes.set(customMapTypeId, customMapType);
+  map.setMapTypeId(customMapTypeId);
 };
