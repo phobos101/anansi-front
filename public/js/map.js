@@ -7,18 +7,37 @@ var cityLoc = {
   lat: 51.507351,
   lng: -0.127758
 };
-var markerImages = {
-  "Javascript": "../public/assets/map-marker-neon-green.png",
-  "Python": "../public/assets/map-marker-neon-green.png",
-  "Hackathon": "../public/assets/map-marker-neon-green.png",
-  undefined: "../public/assets/map-marker-neon-green.png"
-};
-// iconImage();
 
-$("#city-form").on("click", function() {
+// $('#city-form').on('click', function() {
+//   event.preventDefault();
+//   var city = $('#city-search').val();
+// });
+
+$('#event-search').on('submit', function() {
   event.preventDefault();
-  var city = $("#city-search").val();
+  console.log('clicked');
 });
+
+function updateKeyword() {
+  event.preventDefault();
+  $('#results-area').empty();
+
+  var keyword = $('#keyword-entry').val();
+  if (!keyword) keyword = 'css';
+  $('#results-area').append('Grabbing ' + keyword + ' events now. Please wait!');
+
+  $.ajax({
+    method: 'POST',
+    url: 'http://localhost:3000/api/events/populate',
+    data: {keyword}
+  }).done(function(data) {
+    if (!data) {
+      $('#results-area').text('No results for ' + keyword);
+    } else {
+      listEvents();
+    };
+  });
+};
 
 function getEvents() {
   $.ajax({
@@ -70,7 +89,7 @@ function ToggleMenu(menuToggleDiv, map) {
   // Setup the click event listener
   controlUI.addEventListener('click', function() {
     event.preventDefault();
-    $("#wrapper").toggleClass("toggled");
+    $('#wrapper').toggleClass('toggled');
   });
 };
 
@@ -108,10 +127,7 @@ function initMap() {
       title: document.getElementById('event-title').value,
       description: document.getElementById('event-description').value,
       location: document.getElementById('event-location').value,
-      date: document.getElementById('event-date').value,
-      time: document.getElementById('event-time').value,
-      category: category,
-      image: document.getElementById('event-image').value
+      date: document.getElementById('event-date').value
     };
 
     geocodeAddress(eventObj, geocoder);
@@ -134,7 +150,7 @@ function geocodeAddress(eventObj, geocoder) {
     'address': eventObj.location
   }, function(results, status) {
     if (status === google.maps.GeocoderStatus.OK) {
-      var latLngObj = results[0]["geometry"]["location"];
+      var latLngObj = results[0]['geometry']['location'];
       placeMarker(latLngObj, eventObj);
     } else {
       alert('Geocode was not successful for the following reason: ' + status);
@@ -155,7 +171,7 @@ function placeMarker(pos, eventObj) {
 
   markers.push(marker);
 
-  google.maps.event.addListener(marker, "click", function(event) {
+  google.maps.event.addListener(marker, 'click', function(event) {
     markerClick(marker, eventObj);
   });
 
@@ -163,7 +179,7 @@ function placeMarker(pos, eventObj) {
     infoWindow.open(map, marker);
   });
 
-  google.maps.event.addListener(map, "click", function(event) {
+  google.maps.event.addListener(map, 'click', function(event) {
     infoWindow.close();
   });
 };
@@ -176,12 +192,8 @@ function markerClick(marker, eventObj) {
     '</div>' +
     '<h1 id="firstHeading" class="firstHeading">' + eventObj.title + '</h1>' +
     '<div id="bodyContent">' +
-    '<img src="' + eventObj.image + '">' +
-    '<p>' + eventObj.description + '</p>' +
+    '<p class="preline">' + eventObj.description + '</p>' +
     '<p><strong>Date:</strong> ' + eventObj.date + '</p>' +
-    '<p><strong>Start Time:</strong> ' + eventObj.time + '</p>' +
-    '<p><strong>Category:</strong> ' + eventObj.category + '</p>' +
-    '<button>Edit</button>' +
     '</div>' +
     '</div>';
 
@@ -195,7 +207,7 @@ function markerClick(marker, eventObj) {
 
 function autoComplete() {
   var autoComplete = new google.maps.places.Autocomplete(
-    document.getElementById("city-search"), {
+    document.getElementById('city-search'), {
       types: ['(cities)']
     });
 
@@ -210,122 +222,122 @@ function autoComplete() {
 
 function styleMap() {
   var customMapType = new google.maps.StyledMapType([{
-      "featureType": "all",
-      "elementType": "labels.text.fill",
-      "stylers": [{
-        "saturation": 36
+      'featureType': 'all',
+      'elementType': 'labels.text.fill',
+      'stylers': [{
+        'saturation': 36
       }, {
-        "color": "#000000"
+        'color': '#000000'
       }, {
-        "lightness": 40
+        'lightness': 40
       }]
     }, {
-      "featureType": "all",
-      "elementType": "labels.text.stroke",
-      "stylers": [{
-        "visibility": "on"
+      'featureType': 'all',
+      'elementType': 'labels.text.stroke',
+      'stylers': [{
+        'visibility': 'on'
       }, {
-        "color": "#000000"
+        'color': '#000000'
       }, {
-        "lightness": 16
+        'lightness': 16
       }]
     }, {
-      "featureType": "all",
-      "elementType": "labels.icon",
-      "stylers": [{
-        "visibility": "off"
+      'featureType': 'all',
+      'elementType': 'labels.icon',
+      'stylers': [{
+        'visibility': 'off'
       }]
     },
 
     {
-      "featureType": "administrative",
-      "elementType": "geometry.fill",
-      "stylers": [{
-        "color": "#000000"
+      'featureType': 'administrative',
+      'elementType': 'geometry.fill',
+      'stylers': [{
+        'color': '#000000'
       }, {
-        "lightness": 20
+        'lightness': 20
       }]
     },
 
     {
-      "featureType": "administrative",
-      "elementType": "geometry.stroke",
-      "stylers": [{
-        "color": "#000000"
+      'featureType': 'administrative',
+      'elementType': 'geometry.stroke',
+      'stylers': [{
+        'color': '#000000'
       }, {
-        "lightness": 17
+        'lightness': 17
       }, {
-        "weight": 1.2
+        'weight': 1.2
       }]
     },
 
     {
-      "featureType": "landscape",
-      "elementType": "geometry",
-      "stylers": [{
-        "color": "#000000"
+      'featureType': 'landscape',
+      'elementType': 'geometry',
+      'stylers': [{
+        'color': '#000000'
       }, {
-        "lightness": 20
+        'lightness': 20
       }]
     }, {
-      "featureType": "poi",
-      "elementType": "geometry",
-      "stylers": [{
-        "color": "#000000"
+      'featureType': 'poi',
+      'elementType': 'geometry',
+      'stylers': [{
+        'color': '#000000'
       }, {
-        "lightness": 21
+        'lightness': 21
       }]
     },
 
     {
-      "featureType": "road.highway",
-      "elementType": "geometry.fill",
-      "stylers": [{
-        "color": "#000000"
+      'featureType': 'road.highway',
+      'elementType': 'geometry.fill',
+      'stylers': [{
+        'color': '#000000'
       }, {
-        "lightness": 17
+        'lightness': 17
       }]
     }, {
-      "featureType": "road.highway",
-      "elementType": "geometry.stroke",
-      "stylers": [{
-        "color": "#000000"
+      'featureType': 'road.highway',
+      'elementType': 'geometry.stroke',
+      'stylers': [{
+        'color': '#000000'
       }, {
-        "lightness": 29
+        'lightness': 29
       }, {
-        "weight": 0.2
+        'weight': 0.2
       }]
     }, {
-      "featureType": "road.arterial",
-      "elementType": "geometry",
-      "stylers": [{
-        "color": "#000000"
+      'featureType': 'road.arterial',
+      'elementType': 'geometry',
+      'stylers': [{
+        'color': '#000000'
       }, {
-        "lightness": 18
+        'lightness': 18
       }]
     }, {
-      "featureType": "road.local",
-      "elementType": "geometry",
-      "stylers": [{
-        "color": "#000000"
+      'featureType': 'road.local',
+      'elementType': 'geometry',
+      'stylers': [{
+        'color': '#000000'
       }, {
-        "lightness": 16
+        'lightness': 16
       }]
     }, {
-      "featureType": "transit",
-      "elementType": "geometry",
-      "stylers": [{
-        "color": "#000000"
+      'featureType': 'transit',
+      'elementType': 'geometry',
+      'stylers': [{
+        'color': '#000000'
       }, {
-        "lightness": 19
+        'lightness': 19
       }]
     }, {
-      "featureType": "water",
-      "elementType": "geometry",
-      "stylers": [{
-        "color": "#000000"
+      'featureType': 'water',
+      'elementType': 'geometry',
+      'stylers': [{
+        'color': '#000000'
       }, {
-        "lightness": 17
+        'lightness': 17
       }]
     }
 
