@@ -2,29 +2,19 @@ var markers = [];
 var map;
 var bounds;
 var infowindow = null;
-var city = 'London';
 var cityLoc = {
   lat: 51.507351,
   lng: -0.127758
 };
 
-// $('#city-form').on('click', function() {
-//   event.preventDefault();
-//   var city = $('#city-search').val();
-// });
-
-$('#event-search').on('submit', function() {
-  event.preventDefault();
-  console.log('clicked');
-});
+$('#event-search-form').on('submit', updateKeyword);
 
 function updateKeyword() {
   event.preventDefault();
-  $('#results-area').empty();
+  console.log('getting events');
 
   var keyword = $('#keyword-entry').val();
   if (!keyword) keyword = 'css';
-  $('#results-area').append('Grabbing ' + keyword + ' events now. Please wait!');
 
   $.ajax({
     method: 'POST',
@@ -32,9 +22,9 @@ function updateKeyword() {
     data: {keyword}
   }).done(function(data) {
     if (!data) {
-      $('#results-area').text('No results for ' + keyword);
+      console.log('No results for ' + keyword);
     } else {
-      listEvents();
+      getEvents();
     };
   });
 };
@@ -187,13 +177,15 @@ function placeMarker(pos, eventObj) {
 function markerClick(marker, eventObj) {
   if (infowindow) infowindow.close();
 
+  dateObject = new Date(Date.parse(eventObj.date));
+
   var contentString = '<div id="content">' +
     '<div id="siteNotice">' +
     '</div>' +
     '<h1 id="firstHeading" class="firstHeading">' + eventObj.title + '</h1>' +
     '<div id="bodyContent">' +
     '<p class="preline">' + eventObj.description + '</p>' +
-    '<p><strong>Date:</strong> ' + eventObj.date + '</p>' +
+    '<p><strong>Date:</strong> ' + dateObject.toDateString() + '</p>' +
     '</div>' +
     '</div>';
 
