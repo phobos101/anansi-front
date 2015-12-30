@@ -43,12 +43,14 @@ function getEvents() {
 function seedPins(data) {
   var geocoder = new google.maps.Geocoder();
   $.each(data.events, function(index, event) {
-    var eventTime = Date.parse(event.date);
-    var now = Date.now();
+    setTimeout(function() {
+      var eventTime = Date.parse(event.date);
+      var now = Date.now();
 
-    if (eventTime > now) {
-      geocodeAddress(event, geocoder);
-    };
+      if (eventTime > now) {
+        geocodeAddress(event, geocoder);
+      };
+    }, 2000);
   });
 };
 
